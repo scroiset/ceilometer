@@ -507,6 +507,23 @@ def _flatten_metadata(metadata):
                     if type(v) not in set([list, set]))
     return {}
 
+def _unflatten_metadata(d, separator='.'):
+    """Generator that produce dict from flatten metadata
+    :param d: one level dict() where keys will be unflattened.
+    Return a nested dict.
+    """
+    r = {}
+    for k, v in sorted(d.iteritems()):
+        keys = k.split(separator)
+        p = keys[0]
+        if len(keys) == 1:
+            r[p] = v
+            break
+        if keys[0] in r.keys():
+            r[keys[0]].update(_unflatten_metadata({separator.join(keys[1:]) : v}))
+        else:
+             r[keys[0]] = _unflatten_metadata({separator.join(keys[1:]) : v})
+    return r
 
 def _make_link(rel_name, url, type, type_arg, query=None):
     query_str = ''
@@ -757,6 +774,7 @@ class MeterController(rest.RestController):
                 raise wsme.exc.InvalidInput('project_id', s.project_id,
                                             auth_msg)
 
+            rsrc_metadata = _unflatten_metadata(s.resource_metadata)
             published_sample = sample.Sample(
                 name=s.counter_name,
                 type=s.counter_type,
@@ -766,7 +784,7 @@ class MeterController(rest.RestController):
                 project_id=s.project_id,
                 resource_id=s.resource_id,
                 timestamp=s.timestamp.isoformat(),
-                resource_metadata=s.resource_metadata,
+                resource_metadata=rsrc_metadata,
                 source=s.source)
             published_samples.append(published_sample)
 
