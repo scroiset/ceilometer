@@ -18,6 +18,7 @@
 
 
 import abc
+import operator
 
 from ceilometerclient import client as ceiloclient
 from oslo.config import cfg
@@ -31,6 +32,16 @@ LOG = log.getLogger(__name__)
 UNKNOWN = 'insufficient data'
 OK = 'ok'
 ALARM = 'alarm'
+
+
+COMPARATORS = {
+    'gt': operator.gt,
+    'lt': operator.lt,
+    'ge': operator.ge,
+    'le': operator.le,
+    'eq': operator.eq,
+    'ne': operator.ne,
+}
 
 
 @six.add_metaclass(abc.ABCMeta)

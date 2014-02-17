@@ -19,6 +19,7 @@
 from oslo.config import cfg
 from stevedore import extension
 
+from ceilometer.alarm import service as alarm_service
 from ceilometer.event import converter as event_converter
 from ceilometer.openstack.common import context
 from ceilometer.openstack.common.gettextutils import _  # noqa
@@ -89,6 +90,8 @@ class NotificationService(service.DispatchedService, rpc_service.Service):
                         self.NOTIFICATION_NAMESPACE)
         self.notification_manager.map(self._setup_subscription)
 
+        self.notification_alarm_mgr = alarm_service.NotificationAlarmManager()
+
     def _setup_subscription(self, ext, *args, **kwds):
         """Connect to message bus to get notifications
 
@@ -137,6 +140,8 @@ class NotificationService(service.DispatchedService, rpc_service.Service):
 
         if cfg.CONF.notification.store_events:
             self._message_to_event(notification)
+
+        self.notification_alarm_mgr._evaluate_assigned_alarms(notification)
 
     def _message_to_event(self, body):
         """Convert message to Ceilometer Event.

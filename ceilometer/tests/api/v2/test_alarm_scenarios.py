@@ -318,13 +318,14 @@ class TestAlarms(FunctionalTest,
             'type': 'threshold',
             'threshold_rule': None,
             'combination_rule': None,
+            'notification_rule': None,
         }
         resp = self.post_json('/alarms', params=json, expect_errors=True,
                               status=400, headers=self.auth_headers)
         self.assertEqual(
             resp.json['error_message']['faultstring'],
-            "either threshold_rule or combination_rule "
-            "must be set")
+            "only one of threshold_rule, combination_rule or "
+            "notification_rule can be set")
 
     def test_post_invalid_alarm_statistic(self):
         json = {
@@ -383,8 +384,8 @@ class TestAlarms(FunctionalTest,
         self.assertEqual(4, len(alarms))
         self.assertEqual(
             resp.json['error_message']['faultstring'],
-            'threshold_rule and combination_rule cannot '
-            'be set at the same time')
+            'only one of threshold_rule, combination_rule or '
+            'notification_rule can be set')
 
     def test_post_alarm_defaults(self):
         to_check = {

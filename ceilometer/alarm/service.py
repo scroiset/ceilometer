@@ -115,6 +115,32 @@ class AlarmService(object):
         pass
 
 
+class NotificationAlarmManager(AlarmService):
+
+    EXTENSIONS_NAMESPACE = "ceilometer.alarm.notification.evaluator"
+
+    def __init__(self):
+        super(NotificationAlarmManager, self).__init__()
+        self._load_evaluators()
+        self.api_client = None
+
+    def _evaluate_assigned_alarms(self, notification):
+        try:
+            alarms = self._assigned_alarms()
+            LOG.info(_('start evaluation on %d notification alarms') %
+                     len(alarms))
+            for alarm in alarms:
+                for evaluater in self.evaluators:
+                    evaluater.obj.evaluate(alarm, notification)
+        except Exception:
+            LOG.exception(_('alarm evaluation cycle failed'))
+
+    def _assigned_alarms(self):
+        alarms = self._client.alarms.list(q=[{'field': 'enabled',
+                                              'value': True}])
+        return filter(lambda x: x.type == 'notification', alarms)
+
+
 class SingletonAlarmService(AlarmService, os_service.Service):
 
     def __init__(self):
@@ -134,8 +160,10 @@ class SingletonAlarmService(AlarmService, os_service.Service):
         self.tg.add_timer(604800, lambda: None)
 
     def _assigned_alarms(self):
-        return self._client.alarms.list(q=[{'field': 'enabled',
-                                            'value': True}])
+        alarms = self._client.alarms.list(q=[{'field': 'enabled',
+                                              'value': True}])
+        return filter(lambda x: x.type in ['threshold', 'combination'],
+                      alarms)
 
 
 def alarm_evaluator():

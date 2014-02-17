@@ -28,15 +28,6 @@ from ceilometer.openstack.common import timeutils
 
 LOG = log.getLogger(__name__)
 
-COMPARATORS = {
-    'gt': operator.gt,
-    'lt': operator.lt,
-    'ge': operator.ge,
-    'le': operator.le,
-    'eq': operator.eq,
-    'ne': operator.ne,
-}
-
 
 class ThresholdEvaluator(evaluator.Evaluator):
 
@@ -185,7 +176,7 @@ class ThresholdEvaluator(evaluator.Evaluator):
 
         if self._sufficient(alarm, statistics):
             def _compare(stat):
-                op = COMPARATORS[alarm.rule['comparison_operator']]
+                op = evaluator.COMPARATORS[alarm.rule['comparison_operator']]
                 value = getattr(stat, alarm.rule['statistic'])
                 limit = alarm.rule['threshold']
                 LOG.debug(_('comparing value %(value)s against threshold'

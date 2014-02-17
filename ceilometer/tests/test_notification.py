@@ -82,6 +82,7 @@ class TestNotification(tests_base.BaseTestCase):
     def setUp(self):
         super(TestNotification, self).setUp()
         self.srv = notification.NotificationService('the-host', 'the-topic')
+        self.srv.notification_alarm_mgr = mock.MagicMock()
         self.CONF = self.useFixture(config.Config()).conf
         self.CONF.set_override("connection", "log://", group='database')
 

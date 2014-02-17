@@ -1366,13 +1366,60 @@ class AlarmCombinationRule(_Base):
                               '153462d0-a9b8-4b5b-8175-9e4b05e9b856'])
 
 
+class AlarmNotificationRule(_Base):
+    notification_type = wsme.wsattr(wtypes.text, mandatory=True)
+    "type of notifications to be processed"
+
+    comparison_operator = AdvEnum('comparison_operator', str, 'eq', 'ne',
+                                  default='eq')
+    "the opeartor on how to compare notification type against a notification"
+
+    period = wsme.wsattr(wtypes.IntegerType(minimum=0), default=0)
+    "The time period in seconds to reset the alarm state to OK"
+
+    query = wsme.wsattr([Query], default=[])
+    """The query to find the data for matching notofications.
+    """
+
+    def __init__(self, query=None, **kwargs):
+        if query:
+            query = [Query(**q) for q in query]
+        super(AlarmNotificationRule, self).__init__(query=query, **kwargs)
+
+    @property
+    def default_description(self):
+        return (_('Notification type to be processed to generate alarms %s') %
+                self.notification_type)
+
+    def as_dict(self):
+        rule = self.as_dict_from_keys(['comparison_operator',
+                                       'notification_type',
+                                       'period'])
+        if self.query:
+            rule['query'] = [q.as_dict() for q in self.query]
+        else:
+            rule['query'] = []
+        return rule
+
+    @classmethod
+    def sample(cls):
+        return cls(comparison_operator='eq',
+                   notification_type='network.delete.*',
+                   period=0,
+                   query=[{'field': 'network_id',
+                           'value': 'b057c8ea-8277-4672-a946-421550b395f4',
+                           'op': 'eq',
+                           'type': 'string'}])
+
+
 class Alarm(_Base):
     """Representation of an alarm.
 
     .. note::
-        combination_rule and threshold_rule are mutually exclusive. The *type*
-        of the alarm should be set to *threshold* or *combination* and the
-        appropriate rule should be filled.
+        combination_rule, threshold_rule and notification rule are mutually
+        exclusive. The *type* of the alarm should be set to *threshold*,
+        *combination* or *notification* and the appropriate rule should be
+        filled.
     """
 
     alarm_id = wtypes.text
@@ -1411,7 +1458,8 @@ class Alarm(_Base):
     repeat_actions = wsme.wsattr(bool, default=False)
     "The actions should be re-triggered on each evaluation cycle"
 
-    type = AdvEnum('type', str, 'threshold', 'combination', mandatory=True)
+    type = AdvEnum('type', str, 'threshold', 'combination',
+                   'notification', mandatory=True)
     "Explicit type specifier to select which rule to follow below."
 
     threshold_rule = AlarmThresholdRule
@@ -1420,6 +1468,9 @@ class Alarm(_Base):
     combination_rule = AlarmCombinationRule
     """Describe when to trigger the alarm based on combining the state of
     other alarms"""
+
+    notification_rule = AlarmNotificationRule
+    "Describe when to trigger the alarm based on notification received"
 
     # These settings are ignored in the PUT or POST operations, but are
     # filled in for GET
@@ -1447,18 +1498,23 @@ class Alarm(_Base):
                 self.threshold_rule = AlarmThresholdRule(**rule)
             elif self.type == 'combination':
                 self.combination_rule = AlarmCombinationRule(**rule)
+            elif self.type == 'notification':
+                self.notification_rule = AlarmNotificationRule(**rule)
 
     @staticmethod
     def validate(alarm):
-        if (alarm.threshold_rule in (wtypes.Unset, None)
-                and alarm.combination_rule in (wtypes.Unset, None)):
-            error = _("either threshold_rule or combination_rule "
-                      "must be set")
+        rule_val = lambda x: 0 if x is wtypes.Unset else 1
+        rules = sum([rule_val(alarm.threshold_rule),
+                     rule_val(alarm.combination_rule),
+                     rule_val(alarm.notification_rule)])
+        if rules == 0:
+            error = _("one of the threshold_rule, combination_rule or "
+                      "notification_rule must be set")
             raise ClientSideError(error)
 
-        if alarm.threshold_rule and alarm.combination_rule:
-            error = _("threshold_rule and combination_rule "
-                      "cannot be set at the same time")
+        if rules >= 2:
+            error = _("only one of threshold_rule, combination_rule or "
+                      "notification_rule can be set")
             raise ClientSideError(error)
 
         if alarm.threshold_rule:
@@ -1478,6 +1534,12 @@ class Alarm(_Base):
                     alarm_id=id, project=project))
                 if not alarms:
                     raise EntityNotFound(_('Alarm'), id)
+        elif alarm.notification_rule:
+            alarm.notification_rule.query = _sanitize_query(
+                alarm.notification_rule.query,
+                storage.SampleFilter.__init__,
+                on_behalf_of=alarm.project_id
+            )
 
         return alarm
 
