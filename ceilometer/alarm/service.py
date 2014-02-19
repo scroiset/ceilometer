@@ -137,7 +137,9 @@ class NotificationAlarmManager(AlarmService):
 
     def _assigned_alarms(self):
         alarms = self._client.alarms.list(q=[{'field': 'enabled',
-                                              'value': True}])
+                                              'value': True},
+                                             {'field': 'type',
+                                              'value': 'notification'}])
         return filter(lambda x: x.type == 'notification', alarms)
 
 

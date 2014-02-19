@@ -944,10 +944,11 @@ class Connection(base.Connection):
         del alarm['matching_metadata']
         alarm['rule']['query'] = query
 
-    def get_alarms(self, name=None, user=None,
+    def get_alarms(self, name=None, user=None, alarm_type=None,
                    project=None, enabled=None, alarm_id=None, pagination=None):
         """Yields a lists of alarms that match filters
         :param name: The Alarm name.
+        :param alarm_type: The Alarm type.
         :param user: Optional ID for user that owns the resource.
         :param project: Optional ID for project that owns the resource.
         :param enabled: Optional boolean to list disable alarm.
@@ -960,6 +961,8 @@ class Connection(base.Connection):
         q = {}
         if user is not None:
             q['user_id'] = user
+        if alarm_type is not None:
+            q['type'] = alarm_type
         if project is not None:
             q['project_id'] = project
         if name is not None:
