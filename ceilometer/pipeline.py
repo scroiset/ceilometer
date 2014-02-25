@@ -152,6 +152,13 @@ class Source(object):
         else:
             return name
 
+    def handled_meter(self, meter_name):
+        if meter_name in self.meters:
+            LOG.debug('Yep %s' % meter_name)
+            return True
+        # TODO : regexp ... with cache!!!
+        # for m in self.meters:
+
     def support_meter(self, meter_name):
         meter_name = self._variable_meter_name(meter_name)
 
@@ -370,7 +377,7 @@ class Pipeline(object):
         self.publish_samples(ctxt, [sample])
 
     def publish_samples(self, ctxt, samples):
-        supported = [s for s in samples if self.source.support_meter(s.name)]
+        supported = [s for s in samples if self.source.support_meter(s.name) or self.source.handled_meter(s.name)]
         self.sink.publish_samples(ctxt, supported)
 
     def flush(self, ctxt):

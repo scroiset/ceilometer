@@ -37,6 +37,7 @@ from ceilometer.api import app
 from ceilometer.central import manager as central_manager
 from ceilometer import collector
 from ceilometer.compute import manager as compute_manager
+from ceilometer.satellite import manager as satellite_manager
 from ceilometer import notification
 from ceilometer.openstack.common import context
 from ceilometer.openstack.common import importutils
@@ -189,3 +190,8 @@ def send_sample():
             timestamp=cfg.CONF.sample_timestamp,
             resource_metadata=cfg.CONF.sample_metadata and eval(
                 cfg.CONF.sample_metadata))])
+
+
+def agent_satellite():
+    service.prepare_service()
+    os_service.launch(satellite_manager.AgentManager()).wait()

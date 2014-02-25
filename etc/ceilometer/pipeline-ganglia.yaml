@@ -1,0 +1,49 @@
+---
+sources:
+    - name: ganglia_source
+      interval: 15
+      meters:
+          # pollster name
+          - "ganglia"
+          # metrics names
+          - "gpu_num"
+          - "gpu_util"
+          - "gpu_frequency"
+          - "gpu_mem_used"
+          - "gpu_temperature"
+          - "gpu_power_usage"
+          - "cpu_num"
+          - "cpu_nice"
+          - "cpu_wio"
+          - "cpu_user"
+          - "cpu_idle"
+          - "cpu_system"
+          - "cpu_aidle"
+          - "cpu_speed"
+          - "load_one"
+          - "load_five"
+          - "load_fifteen"
+          - "proc_run"
+          - "proc_total"
+          - "mem_free"
+          - "mem_total"
+          - "mem_buffers"
+          - "mem_shared"
+          - "swap_total"
+          - "swap_free"
+          - "disk_free"
+      resources:
+          # the ganglia (gmetad or gmond) endpoint
+          - tcp://localhost:8651
+      sinks:
+          - ganglia_sink
+
+sinks:
+    - name: ganglia_sink
+      transformers:
+      publishers:
+          #NOTE(scroiset): if only 'http' scheme is set
+          # without netlocation, ceilometer client will used
+          # keystone catalog to find ceilometer endpoint
+          #- http://
+          - http://localhost:8777

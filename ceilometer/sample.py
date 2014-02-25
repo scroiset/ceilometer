@@ -74,6 +74,22 @@ class Sample(object):
     def as_dict(self):
         return copy.copy(self.__dict__)
 
+    def as_dict_api(self):
+        """return a dict() which keys match API namespace."""
+
+        m = {'name': 'counter_name',
+             'type': 'counter_type',
+             'unit': 'counter_unit',
+             'volume': 'counter_volume',
+             }
+
+        api = {}
+        for (k, v) in self.as_dict().items():
+            if k in m.keys():
+                k = m[k]
+            api[k] = v
+        return api
+
     @classmethod
     def from_notification(cls, name, type, volume, unit,
                           user_id, project_id, resource_id,

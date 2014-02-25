@@ -1,0 +1,18 @@
+[DEFAULT]
+os_tenant_name = service
+os_password = admin
+os_username = ceilometer
+policy_file = /etc/ceilometer/policy.json
+verbose = True
+notification_topics = notifications
+rabbit_password = stackqueue
+rabbit_host = localhost
+rpc_backend = ceilometer.openstack.common.rpc.impl_kombu
+
+pipeline_cfg_file=pipeline-ganglia.yaml
+
+[ganglia]
+#metrics_to_metadata=instance_uuid,stack_id
+#metric_to_resource_id=instance_uuid
+default_resource_id=11c0939a-bdce-4606-add0-40fa97a41024
+
