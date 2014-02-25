@@ -18,8 +18,6 @@
 # under the License.
 """Tests for ceilometer/publisher/rpc.py
 """
-import datetime
-
 import eventlet
 import mock
 import oslo.messaging
@@ -30,67 +28,11 @@ from ceilometer.openstack.common.fixture import config
 from ceilometer.openstack.common import network_utils
 from ceilometer.openstack.common import test
 from ceilometer.publisher import rpc
-from ceilometer import sample
+from ceilometer.tests import publisher
 
 
 class TestPublish(test.BaseTestCase):
-    test_data = [
-        sample.Sample(
-            name='test',
-            type=sample.TYPE_CUMULATIVE,
-            unit='',
-            volume=1,
-            user_id='test',
-            project_id='test',
-            resource_id='test_run_tasks',
-            timestamp=datetime.datetime.utcnow().isoformat(),
-            resource_metadata={'name': 'TestPublish'},
-        ),
-        sample.Sample(
-            name='test',
-            type=sample.TYPE_CUMULATIVE,
-            unit='',
-            volume=1,
-            user_id='test',
-            project_id='test',
-            resource_id='test_run_tasks',
-            timestamp=datetime.datetime.utcnow().isoformat(),
-            resource_metadata={'name': 'TestPublish'},
-        ),
-        sample.Sample(
-            name='test2',
-            type=sample.TYPE_CUMULATIVE,
-            unit='',
-            volume=1,
-            user_id='test',
-            project_id='test',
-            resource_id='test_run_tasks',
-            timestamp=datetime.datetime.utcnow().isoformat(),
-            resource_metadata={'name': 'TestPublish'},
-        ),
-        sample.Sample(
-            name='test2',
-            type=sample.TYPE_CUMULATIVE,
-            unit='',
-            volume=1,
-            user_id='test',
-            project_id='test',
-            resource_id='test_run_tasks',
-            timestamp=datetime.datetime.utcnow().isoformat(),
-            resource_metadata={'name': 'TestPublish'},
-        ),
-        sample.Sample(
-            name='test3',
-            type=sample.TYPE_CUMULATIVE,
-            unit='',
-            volume=1,
-            user_id='test',
-            project_id='test',
-            resource_id='test_run_tasks',
-            timestamp=datetime.datetime.utcnow().isoformat(),
-            resource_metadata={'name': 'TestPublish'},
-        ),
-    ]
+    test_data = publisher.get_samples()
 
     def setUp(self):
         super(TestPublish, self).setUp()

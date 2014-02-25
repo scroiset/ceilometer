@@ -18,7 +18,6 @@
 """Tests for ceilometer/publisher/file.py
 """
 
-import datetime
 import logging
 import logging.handlers
 import os
@@ -27,46 +26,13 @@ import tempfile
 from ceilometer.openstack.common import network_utils as utils
 from ceilometer.openstack.common import test
 from ceilometer.publisher import file
-from ceilometer import sample
+
+from ceilometer.tests import publisher as test_publisher
 
 
 class TestFilePublisher(test.BaseTestCase):
 
-    test_data = [
-        sample.Sample(
-            name='test',
-            type=sample.TYPE_CUMULATIVE,
-            unit='',
-            volume=1,
-            user_id='test',
-            project_id='test',
-            resource_id='test_run_tasks',
-            timestamp=datetime.datetime.utcnow().isoformat(),
-            resource_metadata={'name': 'TestPublish'},
-        ),
-        sample.Sample(
-            name='test2',
-            type=sample.TYPE_CUMULATIVE,
-            unit='',
-            volume=1,
-            user_id='test',
-            project_id='test',
-            resource_id='test_run_tasks',
-            timestamp=datetime.datetime.utcnow().isoformat(),
-            resource_metadata={'name': 'TestPublish'},
-        ),
-        sample.Sample(
-            name='test2',
-            type=sample.TYPE_CUMULATIVE,
-            unit='',
-            volume=1,
-            user_id='test',
-            project_id='test',
-            resource_id='test_run_tasks',
-            timestamp=datetime.datetime.utcnow().isoformat(),
-            resource_metadata={'name': 'TestPublish'},
-        ),
-    ]
+    test_data = test_publisher.get_samples(3)
 
     def test_file_publisher_maxbytes(self):
         # Test valid configurations

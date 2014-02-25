@@ -18,8 +18,6 @@
 """Tests for ceilometer/publisher/udp.py
 """
 
-import datetime
-
 import mock
 import msgpack
 
@@ -28,75 +26,16 @@ from ceilometer.openstack.common import network_utils
 from ceilometer.openstack.common import test
 from ceilometer.publisher import udp
 from ceilometer.publisher import utils
-from ceilometer import sample
 
+from ceilometer.tests import publisher as test_publisher
 
-COUNTER_SOURCE = 'testsource'
+from ceilometer.openstack.common import log
+
+LOG = log.getLogger(__name__)
 
 
 class TestUDPPublisher(test.BaseTestCase):
-    test_data = [
-        sample.Sample(
-            name='test',
-            type=sample.TYPE_CUMULATIVE,
-            unit='',
-            volume=1,
-            user_id='test',
-            project_id='test',
-            resource_id='test_run_tasks',
-            timestamp=datetime.datetime.utcnow().isoformat(),
-            resource_metadata={'name': 'TestPublish'},
-            source=COUNTER_SOURCE,
-        ),
-        sample.Sample(
-            name='test',
-            type=sample.TYPE_CUMULATIVE,
-            unit='',
-            volume=1,
-            user_id='test',
-            project_id='test',
-            resource_id='test_run_tasks',
-            timestamp=datetime.datetime.utcnow().isoformat(),
-            resource_metadata={'name': 'TestPublish'},
-            source=COUNTER_SOURCE,
-        ),
-        sample.Sample(
-            name='test2',
-            type=sample.TYPE_CUMULATIVE,
-            unit='',
-            volume=1,
-            user_id='test',
-            project_id='test',
-            resource_id='test_run_tasks',
-            timestamp=datetime.datetime.utcnow().isoformat(),
-            resource_metadata={'name': 'TestPublish'},
-            source=COUNTER_SOURCE,
-        ),
-        sample.Sample(
-            name='test2',
-            type=sample.TYPE_CUMULATIVE,
-            unit='',
-            volume=1,
-            user_id='test',
-            project_id='test',
-            resource_id='test_run_tasks',
-            timestamp=datetime.datetime.utcnow().isoformat(),
-            resource_metadata={'name': 'TestPublish'},
-            source=COUNTER_SOURCE,
-        ),
-        sample.Sample(
-            name='test3',
-            type=sample.TYPE_CUMULATIVE,
-            unit='',
-            volume=1,
-            user_id='test',
-            project_id='test',
-            resource_id='test_run_tasks',
-            timestamp=datetime.datetime.utcnow().isoformat(),
-            resource_metadata={'name': 'TestPublish'},
-            source=COUNTER_SOURCE,
-        ),
-    ]
+    test_data = test_publisher.get_samples()
 
     def _make_fake_socket(self, published):
         def _fake_socket_socket(family, type):
